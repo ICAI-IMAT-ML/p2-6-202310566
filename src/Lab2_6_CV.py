@@ -1,3 +1,4 @@
+import numpy as np
 def cross_validation(model, X, y, nFolds):
     """
     Perform cross-validation on a given machine learning model to evaluate its performance.
@@ -45,25 +46,43 @@ def cross_validation(model, X, y, nFolds):
         nFolds = X.shape[0]
 
     # TODO: Calculate fold_size based on the number of folds
-    fold_size = None
+    fold_size = len(X)//(nFolds)
+    resto = len(X) % nFolds
 
     # TODO: Initialize a list to store the accuracy values of the model for each fold
     accuracy_scores = []
-
+    indice_inicial = 0
     for i in range(nFolds):
         # TODO: Generate indices of samples for the validation set for the fold
-        valid_indices = None
+        if i< resto:
+            ajuste_resto = 1
+        else:
+            ajuste_resto = 0
+        indice_final = indice_inicial+ fold_size+ajuste_resto
+        valid_indices = []
+
+        for j in range(indice_final-indice_inicial):
+            valid_indices.append(indice_inicial+j)
 
         # TODO: Generate indices of samples for the training set for the fold
-        train_indices = None
+        train1 = np.arange(0,indice_inicial)
+        train2 = np.arange(indice_final,len(X))
+        train_indices = np.concatenate((train1, train2))
 
         # TODO: Split the dataset into training and validation
-        X_train, X_valid = None, None
-        y_train, y_valid = None, None
+        X_train, X_valid = X[train_indices], X[valid_indices]
+        y_train, y_valid = y[train_indices], y[valid_indices]
 
         # TODO: Train the model with the training set
+        model.fit(X_train, y_train)
+        
 
         # TODO: Calculate the accuracy of the model with the validation set and store it in accuracy_scores
+        score = model.score(X_valid, y_valid)
+        accuracy_scores.append(score)
+        indice_inicial = indice_final
 
     # TODO: Return the mean and standard deviation of the accuracy_scores
-    return None, None
+    media = np.mean(accuracy_scores)
+    desv_tipica = np.std(accuracy_scores)
+    return media, desv_tipica
